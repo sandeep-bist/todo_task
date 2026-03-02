@@ -1,0 +1,28 @@
+{% extends 'tasks/base.html' %}
+
+{% block content %}
+    <h2>{% if task %}Edit Task{% else %}Add Task{% endif %}</h2>
+    <form method="post">
+        {% csrf_token %}
+        <p>
+            <label>Title: <input type="text" name="title" value="{{ task.title|default:'' }}" required></label>
+        </p>
+        <p>
+            <label>Description:<br>
+                <textarea name="description">{{ task.description|default:'' }}</textarea>
+            </label>
+        </p>
+        <p>
+            <label>Due Date: <input type="date" name="due_date" value="{{ task.due_date|default:'' }}"></label>
+        </p>
+        <p>
+            <label>Status:
+                <select name="status">
+                    <option value="pending" {% if task.status == 'pending' %}selected{% endif %}>Pending</option>
+                    <option value="completed" {% if task.status == 'completed' %}selected{% endif %}>Completed</option>
+                </select>
+            </label>
+        </p>
+        <button type="submit">Save</button>
+    </form>
+{% endblock %}
