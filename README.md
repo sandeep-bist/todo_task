@@ -7,8 +7,7 @@ REST API + Web UI using Django (no ORM, raw SQL)
 1. Clone repo
 2. `python -m venv venv && source venv/bin/activate`
 3. `pip install -r requirements.txt`
-4. `python manage.py migrate`  (even though no models — creates django sessions etc.)
-5. `python manage.py runserver`
+4. `python manage.py runserver`
 
 ## API Endpoints
 
