@@ -24,7 +24,7 @@ def get_all_tasks() -> List[Dict]:
         cursor.execute("""
             SELECT id, title, description, due_date, status, created_at
             FROM tasks_task
-            ORDER BY created_at DESC
+            ORDER BY id DESC
         """)
         return dictfetchall(cursor)
 
@@ -75,7 +75,7 @@ class TaskListCreateAPIView(APIView):
     def post(self, request):
         try:
             data = request.data
-            title = data.get("title")
+            title = data.get("title", "").strip()
             if not title:
                 raise ValidationError({"title": "This field is required."})
 
@@ -106,38 +106,28 @@ class TaskDetailAPIView(APIView):
         return Response(task)
 
     def put(self, request, pk):
-        try:
-            data = request.data
-            title = data.get("title")
-            if not title:
-                raise ValidationError({"title": "This field is required."})
+        data = request.data
+        title = data.get("title", "").strip()
+        if not title:
+            raise ValidationError({"title": "This field is required."})
 
-            updated = update_task(
-                task_id=pk,
-                title=title,
-                description=data.get("description", ""),
-                due_date=data.get("due_date"),
-                status=data.get("status", "pending")
-            )
-            if not updated:
-                raise NotFound(detail="Task not found")
-            task = get_task_by_id(pk)
-            return Response(task)
-        except ValidationError as e:
-            return Response(e.detail, status=400)
-        except Exception as e:
-            logger.exception("Error updating task")
-            return Response({"error": "Internal server error"}, status=500)
+        updated = update_task(
+            task_id=pk,
+            title=title,
+            description=data.get("description", ""),
+            due_date=data.get("due_date"),
+            status=data.get("status", "pending")
+        )
+        if not updated:
+            raise NotFound(detail="Task not found")
+        task = get_task_by_id(pk)
+        return Response(task)
 
     def delete(self, request, pk):
-        try:
-            deleted = delete_task(pk)
-            if not deleted:
-                raise NotFound(detail="Task not found")
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        except Exception as e:
-            logger.exception("Error deleting task")
-            return Response({"error": "Internal server error"}, status=500)
+        deleted = delete_task(pk)
+        if not deleted:
+            raise NotFound(detail="Task not found")
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 class TaskListView(View):
     def get(self, request):
@@ -163,6 +153,11 @@ class TaskUpdateView(View):
         task = get_task_by_id(pk)
         if not task:
             return redirect('task_list')
+        
+        # Format date for template if it exists
+        if task['due_date']:
+            task['due_date_formatted'] = task['due_date'].strftime('%Y-%m-%d')
+        
         return render(request, 'tasks/task_form.html', {'task': task})
 
     def post(self, request, pk):

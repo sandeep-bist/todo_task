@@ -13,7 +13,9 @@
             </label>
         </p>
         <p>
-            <label>Due Date: <input type="date" name="due_date" value="{{ task.due_date|default:'' }}"></label>
+            <label>Due Date:<input type="date" name="due_date" value="{{ task.due_date_formatted|default:'' }}">
+                
+            </label>
         </p>
         <p>
             <label>Status:
